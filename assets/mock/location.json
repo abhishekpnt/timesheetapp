@@ -1,0 +1,58 @@
+{
+    "statusCode": 200,
+    "statusMessage": "Success",
+    "errorMessage": "",
+    "responseData": [
+        {
+            "id": 8,
+            "name": "Tarento office",
+            "description": "Working from Tarento office",
+            "sessionId": null,
+            "source": null,
+            "userId": 0,
+            "roleId": 0,
+            "active": false,
+            "orgId": 0,
+            "accountId": 0,
+            "projectId": 0,
+            "buId": 0,
+            "code": null,
+            "locIcon": "fa-suitcase",
+            "groupEmail": null
+        },
+        {
+            "id": 9,
+            "name": "Client Site",
+            "description": "Working from client location",
+            "sessionId": null,
+            "source": null,
+            "userId": 0,
+            "roleId": 0,
+            "active": false,
+            "orgId": 0,
+            "accountId": 0,
+            "projectId": 0,
+            "buId": 0,
+            "code": null,
+            "locIcon": "fa-university",
+            "groupEmail": null
+        },
+        {
+            "id": 10,
+            "name": "WFH",
+            "description": "Choose this option when you work from home",
+            "sessionId": null,
+            "source": null,
+            "userId": 0,
+            "roleId": 0,
+            "active": false,
+            "orgId": 0,
+            "accountId": 0,
+            "projectId": 0,
+            "buId": 0,
+            "code": null,
+            "locIcon": "fa-home",
+            "groupEmail": null
+        }
+    ]
+}

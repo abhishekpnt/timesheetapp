@@ -1,0 +1,186 @@
+{
+    "statusCode": 200,
+    "statusMessage": "Success",
+    "errorMessage": "",
+    "responseData": [
+        {
+            "workDate": "2024-07-24",
+            "timeReportForDate": [
+                {
+                    "workDate": null,
+                    "projectId": 784,
+                    "projectName": "Training",
+                    "taskId": 29,
+                    "taskName": "Trainings - Internal",
+                    "name": null,
+                    "workHour": 480,
+                    "activityRefNumber": "abhishek.nagesh@tarento.com#c65c016a-9514-4840-acff-d733adadd2bc",
+                    "activityNote": "Spark jobs documentation",
+                    "activityId": 1670525,
+                    "sessionId": null,
+                    "userId": 0,
+                    "empId": null,
+                    "featureName": null,
+                    "featureId": null,
+                    "locId": 10,
+                    "locName": "WFH",
+                    "calendarId": null,
+                    "source": null,
+                    "spentTime": null
+                }
+            ],
+            "totalWorkHours": 0,
+            "lockStatus": false
+        },
+        {
+            "workDate": "2024-07-23",
+            "timeReportForDate": [
+                {
+                    "workDate": null,
+                    "projectId": 784,
+                    "projectName": "Training",
+                    "taskId": 29,
+                    "taskName": "Trainings - Internal",
+                    "name": null,
+                    "workHour": 480,
+                    "activityRefNumber": "abhishek.nagesh@tarento.com#7094d046-f209-4e93-9e8b-51f7da892457",
+                    "activityNote": "Spark jobs documentation",
+                    "activityId": 1670524,
+                    "sessionId": null,
+                    "userId": 0,
+                    "empId": null,
+                    "featureName": null,
+                    "featureId": null,
+                    "locId": 10,
+                    "locName": "WFH",
+                    "calendarId": null,
+                    "source": null,
+                    "spentTime": null
+                },
+                {
+                    "workDate": null,
+                    "projectId": 784,
+                    "projectName": "Escalation",
+                    "taskId": 29,
+                    "taskName": "Prod deployment",
+                    "name": null,
+                    "workHour": 530,
+                    "activityRefNumber": "abhishek.nagesh@tarento.com#7094d046-f209-4e93-9e8b-51f7da892457",
+                    "activityNote": "Spark jobs documentation",
+                    "activityId": 1670524,
+                    "sessionId": null,
+                    "userId": 0,
+                    "empId": null,
+                    "featureName": null,
+                    "featureId": null,
+                    "locId": 10,
+                    "locName": "WFH",
+                    "calendarId": null,
+                    "source": null,
+                    "spentTime": null
+                }
+            ],
+            "totalWorkHours": 0,
+            "lockStatus": false
+        },
+        {
+            "workDate": "2024-07-22",
+            "timeReportForDate": [
+                {
+                    "workDate": null,
+                    "projectId": 784,
+                    "projectName": "Training",
+                    "taskId": 29,
+                    "taskName": "Trainings - Internal",
+                    "name": null,
+                    "workHour": 480,
+                    "activityRefNumber": "abhishek.nagesh@tarento.com#db518d40-c316-45cb-b512-9cc69ace2472",
+                    "activityNote": "Validation Spark Job",
+                    "activityId": 1669308,
+                    "sessionId": null,
+                    "userId": 0,
+                    "empId": null,
+                    "featureName": null,
+                    "featureId": null,
+                    "locId": 10,
+                    "locName": "WFH",
+                    "calendarId": null,
+                    "source": null,
+                    "spentTime": null
+                }
+            ],
+            "totalWorkHours": 0,
+            "lockStatus": false
+        },
+        {
+            "workDate": "2024-07-28",
+            "timeReportForDate": [],
+            "totalWorkHours": 0,
+            "lockStatus": false
+        },
+        {
+            "workDate": "2024-07-27",
+            "timeReportForDate": [],
+            "totalWorkHours": 0,
+            "lockStatus": false
+        },
+        {
+            "workDate": "2024-07-26",
+            "timeReportForDate": [
+                {
+                    "workDate": null,
+                    "projectId": 784,
+                    "projectName": "Training",
+                    "taskId": 29,
+                    "taskName": "Trainings - Internal",
+                    "name": null,
+                    "workHour": 480,
+                    "activityRefNumber": "abhishek.nagesh@tarento.com#eb34cc62-87a9-4fce-ab2a-5d22dc036aef",
+                    "activityNote": "Data products- job execution for validation job",
+                    "activityId": 1672305,
+                    "sessionId": null,
+                    "userId": 0,
+                    "empId": null,
+                    "featureName": null,
+                    "featureId": null,
+                    "locId": 10,
+                    "locName": "WFH",
+                    "calendarId": null,
+                    "source": null,
+                    "spentTime": null
+                }
+            ],
+            "totalWorkHours": 0,
+            "lockStatus": false
+        },
+        {
+            "workDate": "2024-07-25",
+            "timeReportForDate": [
+                {
+                    "workDate": null,
+                    "projectId": 784,
+                    "projectName": "Training",
+                    "taskId": 29,
+                    "taskName": "Trainings - Internal",
+                    "name": null,
+                    "workHour": 480,
+                    "activityRefNumber": "abhishek.nagesh@tarento.com#841df32e-e93c-4bef-a5e3-3893d9262a48",
+                    "activityNote": "Spark Jobs Documentation ",
+                    "activityId": 1672304,
+                    "sessionId": null,
+                    "userId": 0,
+                    "empId": null,
+                    "featureName": null,
+                    "featureId": null,
+                    "locId": 10,
+                    "locName": "WFH",
+                    "calendarId": null,
+                    "source": null,
+                    "spentTime": null
+                }
+            ],
+            "totalWorkHours": 0,
+            "lockStatus": false
+        }
+    ]
+}
