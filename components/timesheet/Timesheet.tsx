@@ -352,10 +352,6 @@ const Timesheet: React.FC = () => {
     }
   };
 
-
-  // Call updateTimesheetWithData when you need to save the data
-
-
   if (loading) {
     return <ActivityIndicator size="large" />;
   }
