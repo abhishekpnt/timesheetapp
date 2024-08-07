@@ -8,11 +8,11 @@ interface AccordionProps {
   title: string;
   description?: string;
   iconSource?: any;
-  content?: React.ReactNode;
+  children?: React.ReactNode;
   isAccordion?: boolean;
   showButtons?: boolean;
   expanded?: boolean;
-  onPress?:()=>void;
+  onPress?: () => void;
   onToggle?: () => void;
   showWeekButtons?: boolean; // New prop for week buttons visibility
   onWeekChange?: (direction: 'left' | 'right') => void;
@@ -21,7 +21,7 @@ interface AccordionProps {
 const Accordion: React.FC<AccordionProps> = ({
   title,
   iconSource,
-  content = '',
+  children,
   isAccordion = false,
   showButtons = true,
   expanded = false,
@@ -34,9 +34,9 @@ const Accordion: React.FC<AccordionProps> = ({
   return (
     <Card style={styles.container}>
       <TouchableOpacity onPress={() => {
-  if (onToggle) onToggle();
-  if (onPress) onPress();
-}}>
+        if (onToggle) onToggle();
+        if (onPress) onPress();
+      }}>
         <View style={styles.header}>
           {iconSource && (
             <View style={styles.icon}>
@@ -71,12 +71,12 @@ const Accordion: React.FC<AccordionProps> = ({
         </View>
       </TouchableOpacity>
       {isAccordion && expanded && (
-         <TouchableOpacity onPress={() => {
+        <TouchableOpacity onPress={() => {
           if (onPress) onPress();
         }}>
-        <View style={styles.content}>
-          {content}
-        </View>
+          <View style={styles.children}>
+            {children}
+          </View>
         </TouchableOpacity>
       )}
     </Card>
@@ -97,13 +97,17 @@ const styles = StyleSheet.create({
     elevation: 5,
     padding: 10,
     width: '95%',
-    margin: 'auto'
+    margin: 'auto',
+    color: '#000000'
+
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     backgroundColor: 'white',
+    color: '#000000'
+
   },
   icon: {
     width: '20%',
@@ -113,10 +117,13 @@ const styles = StyleSheet.create({
   titleContainer: {
     width: '60%',
     justifyContent: 'center',
+    color: '#000000'
+
   },
   title: {
     fontSize: 16,
     fontWeight: 'bold',
+    color: '#000000'
   },
   buttons: {
     width: '20%',
@@ -126,6 +133,8 @@ const styles = StyleSheet.create({
   button: {
     fontSize: 16,
     fontWeight: 'bold',
+    color:'#000000'
+
   },
   weekButtonsContainer: {
     flexDirection: 'row',
@@ -136,11 +145,15 @@ const styles = StyleSheet.create({
   weekButton: {
     marginHorizontal: 5,
   },
-  content: {
+  children: {
     marginTop: 10,
+    color: '#000000'
+
   },
   description: {
-    fontSize: 12
+    fontSize: 12,
+    color: '#000000'
+
   }
 });
 
