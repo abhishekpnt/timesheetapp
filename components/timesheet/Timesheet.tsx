@@ -67,20 +67,6 @@ const Timesheet: React.FC = () => {
     fetchInitialData(formattedDates.startDate, formattedDates.endDate); // Fetch data when weekRange changes
   }, [weekRange]);
 
-  const convertDateFormat = (dateRange: { end: string; start: string }) => {
-    const formatDate = (dateStr: string) => {
-      const date = new Date(dateStr);
-      const year = date.getFullYear();
-      const month = (date.getMonth() + 1).toString().padStart(2, '0');
-      const day = date.getDate().toString().padStart(2, '0');
-      return `${year}-${month}-${day}`;
-    };
-
-    return {
-      startDate: formatDate(dateRange.start),
-      endDate: formatDate(dateRange.end),
-    };
-  };
 
   const fetchProjectsAndTasksData = async () => {
     if (!token) {
@@ -129,7 +115,7 @@ const Timesheet: React.FC = () => {
     try {
       setLoading(true);
       const responseData = await fetchData(token, startDate, endDate);
-      console.log('responseData',responseData)
+      console.log('responseData', responseData)
 
       const sortedData = responseData && responseData.sort((a: { workDate: string | number | Date; }, b: { workDate: string | number | Date; }) => {
         const dateA = new Date(a.workDate);
@@ -181,39 +167,6 @@ const Timesheet: React.FC = () => {
       });
       return newState;
     });
-  };
-
-  const getStartOfWeek = (date: Date) => {
-    const day = date.getDay();
-    const diff = (day < 1 ? -6 : 1) - day;
-    return new Date(date.setDate(date.getDate() + diff));
-  };
-
-  const getCurrentWeekRange = () => {
-    const today = new Date();
-    const startOfWeek = getStartOfWeek(today);
-    const endOfWeek = new Date(startOfWeek);
-    endOfWeek.setDate(endOfWeek.getDate() + 6);
-    return {
-      start: startOfWeek.toDateString(),
-      end: endOfWeek.toDateString(),
-    };
-  };
-
-  const formatWeekRange = (start: string, end: string) => {
-    const startDate = new Date(start);
-    const endDate = new Date(end);
-    const options: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
-    const startFormatted = startDate.toLocaleDateString('en-US', options);
-    const endFormatted = endDate.toLocaleDateString('en-US', options);
-    const weekNumber = getWeekNumber(startDate);
-    return `${startFormatted} - ${endFormatted} [Week-${weekNumber}]`;
-  };
-
-  const getWeekNumber = (date: Date) => {
-    const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
-    const pastDaysOfYear = (date.getTime() - firstDayOfYear.getTime()) / 86400000;
-    return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
   };
 
   const handleWeekChange = (direction: 'left' | 'right') => {
@@ -369,7 +322,7 @@ const Timesheet: React.FC = () => {
                             isAccordion={true} // Static content, no toggle
                             showButtons={false} // Hide the +/- buttons
                             expanded={true}
-                            onPress={() => !item.lockStatus&&openModalWithData(item.workDate, report)}
+                            onPress={() => !item.lockStatus && openModalWithData(item.workDate, report)}
                           >
                             <View>
                               <Text style={{ color: "#000" }}>{report.projectName}</Text>
@@ -378,7 +331,7 @@ const Timesheet: React.FC = () => {
                         ))}
                       </>
                     )}
-                {    (!item.lockStatus)&&<Button
+                    {(!item.lockStatus) && <Button
                       style={styles.button}
                       mode="contained"
                       onPress={() => openModal(item.workDate)}
