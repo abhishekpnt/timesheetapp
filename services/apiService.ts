@@ -1,30 +1,52 @@
-import { useState, useEffect } from 'react';
-import * as mockData from '../assets/mock/overview.json';
+// apiService.ts
+export const fetchProjectsAndTasks = async (token: string) => {
+  try {
+    const response = await fetch('https://kronos.tarento.com/api/v1/user/getAllProjectTask', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Accept-Language': 'en-GB,en;q=0.9',
+        'Authorization': token,
+        'Connection': 'keep-alive',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({}),
+    });
 
-const useFetchData = (weekRange: { start: string, end: string }) => {
-  const [data, setData] = useState<any>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<any>(null);
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        setTimeout(() => {
-          const fetchedData = mockData.responseData;
-          setData(fetchedData);
-          setLoading(false);
-        }, 1000);
-      } catch (err) {
-        setError(err);
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [weekRange]);
-
-  return { data, loading, error };
+    const result = await response.json();
+    return result.responseData;
+  } catch (err) {
+    console.error('Error fetching projects and tasks:', err);
+    throw err;
+  }
 };
 
-export default useFetchData;
+export const fetchData = async (token: string, startDate: string, endDate: string) => {
+  try {
+    const response = await fetch('https://kronos.tarento.com/api/v1/user/web/getTimeOverViewWeb', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Accept-Language': 'en-GB,en;q=0.9',
+        'Authorization': token,
+        'Connection': 'keep-alive',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ startDate, endDate }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    const fetchedData = await response.json();
+    return fetchedData.responseData;
+  } catch (err) {
+    console.error('Error fetching data:', err);
+    throw err;
+  }
+};

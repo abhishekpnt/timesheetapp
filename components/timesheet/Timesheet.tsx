@@ -4,17 +4,20 @@ import Accordion from '../reuse/Accordion/Accordion'; // Adjust path as needed
 import Time from '../../assets/img/time.svg';
 import Calender from '../../assets/img/calender.svg';
 import Log from '../../assets/img/log.svg';
-
 import CalendarPicker from 'react-native-calendar-picker';
 import Header from '../sticky/header/Header';
 import { TextInput, Chip, Button, PaperProvider, SegmentedButtons, } from 'react-native-paper';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Dropdown } from 'react-native-element-dropdown';
 import { useAuth } from '../../context/AuthContext'; // Adjust path as needed
-import { customTheme } from '../../assets/theme'
+import { customTheme } from '../../assets/theme';
+import { fetchProjectsAndTasks, fetchData } from '../../services/apiService'; // Import the API functions
+import { convertDateFormat, getStartOfWeek, getCurrentWeekRange, formatWeekRange, getWeekNumber } from '../../services/dateUtil';
+
 type ExpandedStateType = {
   [key: string]: boolean;
 };
+
 const Timesheet: React.FC = () => {
   const [weekRange, setWeekRange] = useState<{ start: string; end: string }>({ start: '', end: '' });
   const [isAccordionExpanded, setAccordionExpanded] = useState(false);
@@ -28,60 +31,41 @@ const Timesheet: React.FC = () => {
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [timesheetInput, setTimesheetInput] = useState<string>('');
-  const [totalTime, setTotalTime] = useState<any>('')
+  const [totalTime, setTotalTime] = useState<any>('');
   const [hours, setHours] = useState<string>('');
   const [minutes, setMinutes] = useState<string>('');
-
-
-  const [location, setLocation] = React.useState('Tarento Office');
+  const [location, setLocation] = useState('Tarento Office');
   const { isAuthenticated, token } = useAuth(); // Access the token from AuthContext
-
 
   const [projects, setProjects] = useState<any[]>([]);
   const [tasks, setTasks] = useState<any[]>([]);
   const [projectTasksMap, setProjectTasksMap] = useState<Map<number, any[]>>(new Map());
   const [selectedProject, setSelectedProject] = useState<number | null>(null);
-  const [selectedTask, setSelectedTask] =  useState<number | null>(null);
+  const [selectedTask, setSelectedTask] = useState<number | null>(null);
 
   const locations = [
-    {
-      value: 'Tarento Office',
-      label: 'Tarento Office',
-    },
-    {
-      value: 'Client Site',
-      label: 'Client Site',
-    },
+    { value: 'Tarento Office', label: 'Tarento Office' },
+    { value: 'Client Site', label: 'Client Site' },
     { value: 'WFH', label: 'WFH' },
-  ]
-
+  ];
 
   useEffect(() => {
     const currentWeekRange = getCurrentWeekRange();
     setWeekRange(currentWeekRange);
     setAccordionTitle(formatWeekRange(currentWeekRange.start, currentWeekRange.end));
     setCalendarDate(new Date(currentWeekRange.start));
-    // setCalendarKey(prev => prev + 1); // Force CalendarPicker to re-render
-    console.log('1111')
-    console.log('cu', currentWeekRange)
     const formattedDates = convertDateFormat(currentWeekRange);
-    Promise.all([
-      fetchData(formattedDates.startDate, formattedDates.endDate),
-    ]);
+    fetchInitialData(formattedDates.startDate, formattedDates.endDate);
   }, []);
 
   useEffect(() => {
-    fetchProjectsAndTasks();
+    fetchProjectsAndTasksData();
   }, []);
 
   useEffect(() => {
-    console.log('2222')
-    console.log('cu', weekRange)
     const formattedDates = convertDateFormat(weekRange);
-    fetchData(formattedDates.startDate, formattedDates.endDate); // Fetch data when weekRange changes
-
+    fetchInitialData(formattedDates.startDate, formattedDates.endDate); // Fetch data when weekRange changes
   }, [weekRange]);
-
 
   const convertDateFormat = (dateRange: { end: string; start: string }) => {
     const formatDate = (dateStr: string) => {
@@ -98,55 +82,35 @@ const Timesheet: React.FC = () => {
     };
   };
 
-  const fetchProjectsAndTasks = async () => {
+  const fetchProjectsAndTasksData = async () => {
     if (!token) {
       console.error('No token found');
       return;
     }
     try {
-      const response = await fetch('https://kronos.tarento.com/api/v1/user/getAllProjectTask', {
-        method: 'POST',
-        headers: {
-          'Accept': 'application/json',
-          'Accept-Language': 'en-GB,en;q=0.9',
-          'Authorization': token,
-          'Connection': 'keep-alive',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({})
-      });
+      const responseData = await fetchProjectsAndTasks(token);
+      const projectList = responseData.projectList;
+      const projectTaskMap = responseData.projectTaskMap;
+      const taskList = responseData.taskList;
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-
-      const result = await response.json();
-      const projectList = result.responseData.projectList;
-      const projectTaskMap = result.responseData.projectTaskMap;
-      const taskList = result.responseData.taskList;
-
-      // Map project list to options
       const projectOptions = projectList.map((project: any) => ({
         value: project.id,
-        label: project.name
+        label: project.name,
       }));
 
-      // Map task list to options
       const taskOptions = taskList.map((task: any) => ({
         value: task.id,
-        label: task.name
+        label: task.name,
       }));
 
-      // Create a map for project-task relationships
       const taskMap = new Map<number, string>();
       taskList.forEach((task: any) => taskMap.set(task.id, task.name));
 
-      // Create a map for project-task relationships
       const projectTasks = new Map<number, any[]>();
       projectTaskMap.forEach((projectMap: any) => {
         projectTasks.set(projectMap.projectId, projectMap.taskList.map((taskId: number) => ({
           value: taskId,
-          label: taskMap.get(taskId)
+          label: taskMap.get(taskId),
         })));
       });
 
@@ -157,58 +121,35 @@ const Timesheet: React.FC = () => {
     }
   };
 
-
-  const fetchData = async (startDate: string, endDate: string) => {
+  const fetchInitialData = async (startDate: string, endDate: string) => {
     if (!token) {
       console.error('No token found');
       return;
     }
     try {
       setLoading(true);
-      const response = await fetch('https://kronos.tarento.com/api/v1/user/web/getTimeOverViewWeb', {
-        method: 'POST',
-        headers: {
-          'Accept': 'application/json',
-          'Accept-Language': 'en-GB,en;q=0.9',
-          'Authorization': token,  // Use the token from AuthContext
-          'Connection': 'keep-alive',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ startDate, endDate })
+      const responseData = await fetchData(token, startDate, endDate);
+      console.log('responseData',responseData)
+
+      const sortedData = responseData && responseData.sort((a: { workDate: string | number | Date; }, b: { workDate: string | number | Date; }) => {
+        const dateA = new Date(a.workDate);
+        const dateB = new Date(b.workDate);
+        return dateA.getTime() - dateB.getTime();
+
       });
+      setData(sortedData);
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-
-      const fetchedData = await response.json();
-      console.log('fetchedData', fetchedData.responseData);
-
-      if (fetchedData && Array.isArray(fetchedData.responseData)) {
-        const sortedData = fetchedData.responseData.sort((a: { workDate: string | number | Date; }, b: { workDate: string | number | Date; }) => {
-          const dateA = new Date(a.workDate);
-          const dateB = new Date(b.workDate);
-          return dateA.getTime() - dateB.getTime();
-        });
-        setData(sortedData);
-
-        const totalTime = (sortedData || []).reduce((acc: number, item: any) => {
-          return acc + ((item.timeReportForDate && item.timeReportForDate.length > 0) ? item.timeReportForDate.reduce((sum: number, report: any) => sum + report.workHour, 0) : 0);
-        }, 0);
-        console.log('total', totalTime)
-        const formattedTime = convertMinutesToHoursAndMinutes(totalTime);
-        setTotalTime(formattedTime);
-      } else {
-        console.log('fetchedData or fetchedData.responseData is undefined or not an array');
-      }
-
+      const totalTime = (sortedData || []).reduce((acc: number, item: any) => {
+        return acc + ((item.timeReportForDate && item.timeReportForDate.length > 0) ? item.timeReportForDate.reduce((sum: number, report: any) => sum + report.workHour, 0) : 0);
+      }, 0);
+      const formattedTime = convertMinutesToHoursAndMinutes(totalTime);
+      setTotalTime(formattedTime);
     } catch (err) {
       setError(err);
     } finally {
       setLoading(false);
     }
   };
-
 
   const onDateChange = (date: any) => {
     const selectedDate = new Date(date);
@@ -354,7 +295,6 @@ const Timesheet: React.FC = () => {
   };
 
   const openModalWithData = (date: string, report: any) => {
-    console.log('inside',report)
     setSelectedDate(date);
     setTimesheetInput(report.activityNote || '');
     setSelectedProject(report.projectId || null);
@@ -429,7 +369,7 @@ const Timesheet: React.FC = () => {
                             isAccordion={true} // Static content, no toggle
                             showButtons={false} // Hide the +/- buttons
                             expanded={true}
-                            onPress={() => openModalWithData(item.workDate, report)}
+                            onPress={() => !item.lockStatus&&openModalWithData(item.workDate, report)}
                           >
                             <View>
                               <Text style={{ color: "#000" }}>{report.projectName}</Text>
@@ -438,13 +378,13 @@ const Timesheet: React.FC = () => {
                         ))}
                       </>
                     )}
-                    <Button
+                {    (!item.lockStatus)&&<Button
                       style={styles.button}
                       mode="contained"
                       onPress={() => openModal(item.workDate)}
                     >
                       +
-                    </Button>
+                    </Button>}
                   </View>
                 </Accordion>
               ))}
@@ -700,9 +640,6 @@ const styles = StyleSheet.create({
   listContainer: {
     width: 140,
     color: '#000000',
-// display:'flex',
-// justifyContent:'center',
-// alignItems:'center'
   }
 
 });
