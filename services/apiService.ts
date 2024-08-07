@@ -44,7 +44,59 @@ export const fetchData = async (token: string, startDate: string, endDate: strin
     }
 
     const fetchedData = await response.json();
+    console.log('responseData data:', fetchedData);
+
     return fetchedData.responseData;
+  } catch (err) {
+    console.error('Error fetching data:', err);
+    throw err;
+  }
+};
+
+export const saveData = async (token: string,payload:any) => {
+  try {
+    const response = await fetch('https://kronos.tarento.com/api/v1/user/saveTaskTimeForProject', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': token
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    const responseData = await response.json();
+
+    return responseData;
+  } catch (err) {
+    console.error('Error fetching data:', err);
+    throw err;
+  }
+};
+
+export const updateData = async (token: string,payload:any) => {
+  try {
+    const response = await fetch('https://kronos.tarento.com/api/v1/user/updateTaskTimeForProject', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': token
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    const responseData = await response.json();
+
+    return responseData;
   } catch (err) {
     console.error('Error fetching data:', err);
     throw err;

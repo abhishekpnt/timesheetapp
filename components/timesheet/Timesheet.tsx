@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ActivityIndicator, StyleSheet, ScrollView, Modal, TouchableWithoutFeedback } from 'react-native';
+import { View, Text, ActivityIndicator, StyleSheet, ScrollView, Modal, TouchableWithoutFeedback, Alert } from 'react-native';
 import Accordion from '../reuse/Accordion/Accordion'; // Adjust path as needed
 import Time from '../../assets/img/time.svg';
 import Calender from '../../assets/img/calender.svg';
@@ -11,8 +11,10 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Dropdown } from 'react-native-element-dropdown';
 import { useAuth } from '../../context/AuthContext'; // Adjust path as needed
 import { customTheme } from '../../assets/theme';
-import { fetchProjectsAndTasks, fetchData } from '../../services/apiService'; // Import the API functions
+import { fetchProjectsAndTasks, fetchData, saveData, updateData } from '../../services/apiService'; // Import the API functions
 import { convertDateFormat, getStartOfWeek, getCurrentWeekRange, formatWeekRange, getWeekNumber } from '../../services/dateUtil';
+import uuid from 'react-native-uuid';
+
 
 type ExpandedStateType = {
   [key: string]: boolean;
@@ -35,13 +37,15 @@ const Timesheet: React.FC = () => {
   const [hours, setHours] = useState<string>('');
   const [minutes, setMinutes] = useState<string>('');
   const [location, setLocation] = useState('Tarento Office');
-  const { isAuthenticated, token } = useAuth(); // Access the token from AuthContext
+  const { profile, token } = useAuth(); // Access the token from AuthContext
 
   const [projects, setProjects] = useState<any[]>([]);
   const [tasks, setTasks] = useState<any[]>([]);
   const [projectTasksMap, setProjectTasksMap] = useState<Map<number, any[]>>(new Map());
   const [selectedProject, setSelectedProject] = useState<number | null>(null);
   const [selectedTask, setSelectedTask] = useState<number | null>(null);
+  const [activityRefNumber, setActivityRefNumber] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
 
   const locations = [
     { value: 'Tarento Office', label: 'Tarento Office' },
@@ -82,6 +86,7 @@ const Timesheet: React.FC = () => {
       const projectOptions = projectList.map((project: any) => ({
         value: project.id,
         label: project.name,
+        // billabaale:project.
       }));
 
       const taskOptions = taskList.map((task: any) => ({
@@ -223,7 +228,9 @@ const Timesheet: React.FC = () => {
 
   const openModal = (date: string) => {
     setSelectedDate(date);
+    setLocation('Tarento Office')
     setModalVisible(true);
+    setIsEditing(false);
   };
 
   const closeModal = () => {
@@ -236,9 +243,42 @@ const Timesheet: React.FC = () => {
     setLocation('')
   };
 
-  const updateTimesheet = () => {
-    console.log(`Timesheet for ${selectedDate}: ${timesheetInput}`);
-    closeModal();
+  const updateTimesheet = async () => {
+    if (!token) {
+      console.error('No token found');
+      return;
+    }
+
+    const payload = {
+      time: [
+        {
+          date: selectedDate,
+          pid: selectedProject,
+          tid: selectedTask,
+          minute: parseInt(hours) * 60 || 0 + parseInt(minutes) || 0,
+          note: timesheetInput,
+          locId: location === 'Tarento Office' ? 8 : location === 'Client Site' ? 9 : 10, // Adjust as per your location IDs
+          onSite: false,
+          activityRefNumber: `${profile.email}#${uuid.v4()}`
+        }
+      ]
+    };
+
+    try {
+      let response = await saveData(token, payload)
+      if (response.statusCode == 200 && response.statusMessage == 'Success') {
+        const formattedDates = convertDateFormat(weekRange);
+        fetchInitialData(formattedDates.startDate, formattedDates.endDate); // Refresh the data
+        closeModal();
+      } else {
+        Alert.alert('Please fill the required details')
+        //  console.error('Failed to update timesheet:', response.statusText);
+      }
+
+    } catch (error) {
+      console.error('Error updating timesheet:', error);
+      // Handle error (e.g., show an error message)
+    }
   };
 
   const convertMinutesToHoursAndMinutes = (minutes: any) => {
@@ -247,16 +287,74 @@ const Timesheet: React.FC = () => {
     return `${hours}H ${mins}M`;
   };
 
+  const isFormValid = () => {
+    return (
+      timesheetInput.trim() !== '' &&
+      selectedProject !== null &&
+      selectedTask !== null &&
+      hours.trim() !== '' &&
+      minutes.trim() !== ''
+    );
+  };
+  
   const openModalWithData = (date: string, report: any) => {
+    console.table('report', report);
+
+    // Set state values first
     setSelectedDate(date);
     setTimesheetInput(report.activityNote || '');
-    setSelectedProject(report.projectId || null);
-    setSelectedTask(report.taskId || null);
+    setSelectedProject(report.projectId);
+    setSelectedTask(report.taskId);
     setHours(Math.floor(report.workHour / 60).toString());
     setMinutes((report.workHour % 60).toString());
     setLocation(report.locName || 'Tarento Office');
+    setActivityRefNumber(report.activityRefNumber); // Set activityRefNumber from report
     setModalVisible(true);
+    setIsEditing(true);
   };
+
+  const updateTimesheetWithData = async () => {
+    if (!token) {
+      console.error('No token found');
+      return;
+    }
+
+    const payload = {
+      time: [
+        {
+          date: selectedDate,
+          pid: selectedProject,
+          tid: selectedTask,
+          minute: parseInt(hours) * 60 + parseInt(minutes),
+          note: timesheetInput,
+          locId: location === 'Tarento Office' ? 8 : location === 'Client Site' ? 9 : 10, // Adjust as per your location IDs
+          onSite: false,
+          activityRefNumber: activityRefNumber, // Use the activityRefNumber from state
+        },
+      ],
+    };
+
+    try {
+      let response = await updateData(token, payload);
+      if (response.statusCode === 200 && response.statusMessage === 'Success') {
+        console.log('weekRange', weekRange);
+        const formattedDates = convertDateFormat(weekRange);
+        fetchInitialData(formattedDates.startDate, formattedDates.endDate); // Refresh the data
+        closeModal();
+      } else {
+        // console.error('Failed to update timesheet:', response.statusText);
+        Alert.alert('Please fill the required details')
+
+      }
+    } catch (error) {
+      console.error('Error updating timesheet:', error);
+      // Handle error (e.g., show an error message)
+    }
+  };
+
+
+  // Call updateTimesheetWithData when you need to save the data
+
 
   if (loading) {
     return <ActivityIndicator size="large" />;
@@ -316,7 +414,7 @@ const Timesheet: React.FC = () => {
                       <>
                         {item.timeReportForDate.map((report: any, index: number) => (
                           <Accordion
-                            key={item.workDate}
+                            key={`${item.workDate}-${index}`}
                             title={report.taskName}
                             description={convertMinutesToHoursAndMinutes(report.workHour)}// Dynamically passed image
                             isAccordion={true} // Static content, no toggle
@@ -354,7 +452,7 @@ const Timesheet: React.FC = () => {
               <View style={styles.modalOverlay}>
                 <TouchableWithoutFeedback>
                   <View style={styles.modalView}>
-                    <Chip style={styles.modalText} >Add/Edit Timesheet for {selectedDate}</Chip>
+                    <Chip style={styles.modalText} > {isEditing ? 'Update' : 'Add'} Timesheet for {selectedDate}</Chip>
                     <TextInput
                       multiline={false}
                       numberOfLines={1}
@@ -443,8 +541,13 @@ const Timesheet: React.FC = () => {
                     />
 
                     <View style={styles.buttonContainer}>
-                      {<Button mode="outlined" onPress={updateTimesheet} children={'Update'} />}
-                      {/* <Button title="Cancel" onPress={closeModal} /> */}
+                      <Button
+                        mode="outlined"
+                        onPress={isEditing ? updateTimesheetWithData : updateTimesheet}
+                        disabled={!isFormValid()}
+                      >
+                        {isEditing ? 'Update' : 'Add'}
+                      </Button>
                     </View>
                   </View>
                 </TouchableWithoutFeedback>
